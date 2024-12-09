@@ -55,8 +55,6 @@ struct fat_bpb {
     uint32_t total_sectors_32;       // Número total de setores (usado se total_sectors_16 for zero)
     uint32_t sect_per_fat_32;        // Setores por FAT em FAT32
 
-    uint16_t ext_flags;              // Bandeiras estendidas
-    uint16_t fs_version;             // Versão do sistema de arquivos
     uint32_t root_cluster;           // Cluster inicial do diretório raiz em FAT32
     uint16_t fs_info;                // Setor de informações do sistema de arquivos
     uint16_t backup_boot_sector;     // Setor de backup do setor de boot
