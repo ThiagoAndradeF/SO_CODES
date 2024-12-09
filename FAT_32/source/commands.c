@@ -260,7 +260,7 @@ void cp(FILE *fp, char* source, char* dest, struct fat_bpb *bpb)
     //CLUSTERS
     {
         /*
-         * Detalhes sobre a alocação de novos clusters:
+         * Detalhes sobre a alocação de novos clusters:S
          * A alocação dos clusters ocorre de trás para frente; o último é alocado primeiro,
          * principalmente para garantir que seu valor seja FAT16_EOF_HI.
         */

@@ -19,8 +19,9 @@ uint32_t bpb_froot_addr(struct fat_bpb *bpb)
         // FAT16
         return bpb_faddress(bpb) + bpb->n_fat * bpb->sect_per_fat_16 * bpb->bytes_p_sect;
     } else {
-        // FAT32
-        return bpb_fdata_addr(bpb) + (bpb->root_cluster - 2) * bpb->sector_p_clust * bpb->bytes_p_sect;
+        // FAT32: Aplica a máscara ao cluster inicial
+        uint32_t root_cluster = bpb->root_cluster & FAT32_CLUSTER_MASK;
+        return bpb_fdata_addr(bpb) + (root_cluster - 2) * bpb->sector_p_clust * bpb->bytes_p_sect;
     }
 }
 
@@ -30,10 +31,11 @@ uint32_t bpb_fdata_addr(struct fat_bpb *bpb)
 {
     if (bpb->sect_per_fat_16 != 0) {
         // FAT16
-        return bpb_froot_addr(bpb) + bpb->root_entry_count * 32;
+        uint32_t root_dir_sectors = ((bpb->root_entry_count * 32) + (bpb->bytes_p_sect - 1)) / bpb->bytes_p_sect;
+        return bpb_faddress(bpb) + (bpb->n_fat * bpb->sect_per_fat_16 * bpb->bytes_p_sect) + (root_dir_sectors * bpb->bytes_p_sect);
     } else {
         // FAT32
-        return bpb_faddress(bpb) + bpb->n_fat * bpb->sect_per_fat_32 * bpb->bytes_p_sect;
+        return bpb_faddress(bpb) + (bpb->n_fat * bpb->sect_per_fat_32 * bpb->bytes_p_sect);
     }
 }
 
@@ -54,10 +56,10 @@ static uint32_t bpb_fdata_sector_count_s(struct fat_bpb* bpb)
 }
 
 /* Calcula a quantidade de clusters de dados (Um cluster contém um ou mais setores) */
-uint32_t bpb_fdata_cluster_count(struct fat_bpb* bpb)
+uint32_t bpb_fdata_cluster_count(struct fat_bpb *bpb)
 {
     uint32_t data_sectors = bpb_fdata_sector_count_s(bpb);
-    return data_sectors / bpb->sector_p_clust;
+    return data_sectors / bpb->sector_p_clust; // Clusters não precisam de máscara aqui
 }
 
 /*

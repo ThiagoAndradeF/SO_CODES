@@ -55,7 +55,7 @@ struct fat_bpb {
     uint32_t total_sectors_32;       // Número total de setores (usado se total_sectors_16 for zero)
     uint32_t sect_per_fat_32;        // Setores por FAT em FAT32
 
-    uint32_t root_cluster;           // Cluster inicial do diretório raiz em FAT32
+    uint32_t root_cluster;           // Cluster inicial do diretório raiz em FAT32 (masked with FAT32_CLUSTER_MASK)
     uint16_t fs_info;                // Setor de informações do sistema de arquivos
     uint16_t backup_boot_sector;     // Setor de backup do setor de boot
 
@@ -88,5 +88,6 @@ uint32_t bpb_fdata_cluster_count(struct fat_bpb* bpb);
 
 #define FAT16_EOF_LO 0xfff8
 #define FAT16_EOF_HI 0xffff
+#define FAT32_CLUSTER_MASK 0x0FFFFFFF
 
 #endif
