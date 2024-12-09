@@ -45,14 +45,27 @@ struct far_dir_searchres find_in_root(struct fat_dir* root, char* filename, stru
 
 struct fat_dir *ls(FILE *fp, struct fat_bpb *bpb)
 {
-    uint32_t root_address = bpb_froot_addr(bpb);
-    uint32_t root_size = sizeof(struct fat_dir) * bpb->root_entry_count;
+    // Verifica se é FAT32
+    if (bpb->sect_per_fat_16 != 0) {
+        error_at_line(EXIT_FAILURE, EINVAL, __FILE__, __LINE__, "O sistema de arquivos não é FAT32");
+        return NULL;
+    }
 
-    struct fat_dir *dirs = malloc(root_size);
+    // Calcula o endereço do diretório raiz
+    uint32_t root_cluster = bpb->root_cluster & FAT32_CLUSTER_MASK;
+    uint32_t root_address = bpb_fdata_addr(bpb) + (root_cluster - 2) * bpb->sector_p_clust * bpb->bytes_p_sect;
 
-    if (read_bytes(fp, root_address, dirs, root_size) == RB_ERROR)
-    {
-        error_at_line(EXIT_FAILURE, EIO, __FILE__, __LINE__, "erro ao ler struct fat_dir");
+    // Tenta ler o diretório raiz (Tamanho de um cluster, por exemplo)
+    uint32_t cluster_size = bpb->sector_p_clust * bpb->bytes_p_sect;
+    struct fat_dir *dirs = malloc(cluster_size);
+
+    if (!dirs) {
+        error_at_line(EXIT_FAILURE, ENOMEM, __FILE__, __LINE__, "Falha ao alocar memória para o diretório");
+    }
+
+    if (read_bytes(fp, root_address, dirs, cluster_size) == RB_ERROR) {
+        free(dirs);
+        error_at_line(EXIT_FAILURE, EIO, __FILE__, __LINE__, "Erro ao ler struct fat_dir");
     }
 
     return dirs;

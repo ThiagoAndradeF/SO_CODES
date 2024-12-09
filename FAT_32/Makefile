@@ -10,7 +10,7 @@ HEADERS = $(shell find $(INCLUDE) -type f -name '*.h')
 
 NAME = obese32
 
-.PHONY: builddir
+.PHONY: builddir format
 
 all: $(NAME)
 
@@ -25,8 +25,19 @@ $(OBJS): $(BUILD)/%.o: $(SOURCE)/%.c $(HEADERS)
 	@echo 'CC   ' $<
 
 clean:
-	@rm -vf $(NAME) $(UBJS) $(OBJS)
+	@rm -vf $(NAME) $(OBJS)
 
 $(NAME): builddir $(OBJS)
 	@$(CC) $(CARGS) $(OBJS) -o $@
 	@echo 'CCLD ' $(NAME)
+
+# Comando para criar a imagem FAT32
+format: resetimg
+	@mkfs.vfat -F 32 -n "DISKNAME" disk.img
+	@status=$$?; \
+	if [ $$status -eq 0 ]; then \
+		echo 'Formatado para FAT32 com sucesso'; \
+	else \
+		echo 'Erro ao formatar para FAT32'; \
+		exit 1; \
+	fi

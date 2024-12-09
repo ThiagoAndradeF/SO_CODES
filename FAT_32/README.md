@@ -15,7 +15,7 @@ O sistema deve ter um compilador GCC 11+, com suporte à C11, e GNU Make.
 Para compilar, rode:
 
 ```
-$ make resetimg obese32
+$ make resetimg format obese32
 ```
 
 Para executar, rode:
